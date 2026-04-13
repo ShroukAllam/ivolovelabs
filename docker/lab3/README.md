@@ -1,12 +1,17 @@
-# Lab 3: Java Spring Boot Docker Container
+# Lab 3: Docker Container for Spring Boot App
 
-## Steps performed:
-- Cloned application from GitHub
-- Created Dockerfile with Maven + Java 17
-- Built app1 image
-- Ran container on port 8082 (due to Jenkins on 8080)
-- Tested successfully
+## Steps:
+1. Clone code
+2. Write Dockerfile with Maven + Java 17
+3. Build image: `docker build -t app1 .`
+4. Run container: `docker run -d --name container1 -p 8082:8080 app1`
+5. Test: `curl http://localhost:8082`
+6. Clean: `docker stop container1 && docker rm container1`
 
-## Files:
-- Dockerfile: Multi-stage build configuration
-- Source code: Spring Boot application
+## Dockerfile:
+FROM maven:3.8.4-openjdk-17
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+EXPOSE 8080
+CMD ["java", "-jar", "target/demo-0.0.1-SNAPSHOT.jar"]
