@@ -1,4 +1,4 @@
-# Lab 16 & Lab 17 — Kubernetes Pod Management
+# Lab 16 Kubernetes Pod Management
 
 ---
 
@@ -85,7 +85,7 @@ spec:
 
 ```bash
 kubectl apply -f mysql-deployment.yaml
-kubectl get pods -n ivolve -w   # wait for Running
+kubectl get pods -n ivolve -w   
 ```
 
 #### 2. Create ConfigMap and Secret
@@ -96,6 +96,8 @@ kubectl create configmap db-config \
   --from-literal=DB_PORT=3306 \
   --from-literal=DB_NAME=ivolve \
   -n ivolve
+<img width="724" height="64" alt="image" src="https://github.com/user-attachments/assets/8c80abce-449f-4bfb-8937-73ff1ecc227e" />
+
 
 kubectl create secret generic db-secret \
   --from-literal=MYSQL_ROOT_PASSWORD=rootpassword \
@@ -103,6 +105,8 @@ kubectl create secret generic db-secret \
   --from-literal=MYSQL_APP_PASSWORD=apppassword \
   -n ivolve
 ```
+<img width="696" height="60" alt="image" src="https://github.com/user-attachments/assets/934f91da-b378-47d3-babb-bf03c0cd8bb8" />
+
 
 #### 3. Update Node.js Deployment with Init Container
 
@@ -212,6 +216,8 @@ kubectl apply -f deployment.yaml
 ```bash
 # Check pod status (should show Init:0/1 → Running)
 kubectl get pods -n ivolve -w
+<img width="686" height="82" alt="image" src="https://github.com/user-attachments/assets/bfe2a198-852d-4162-8994-bc065cfb90c3" />
+
 
 # View init container logs
 kubectl logs <pod-name> -c db-init -n ivolve
@@ -226,18 +232,19 @@ kubectl exec -it <mysql-pod-name> -n ivolve -- mysql -u root -p
 ```sql
 -- Check database exists
 SHOW DATABASES;
+<img width="271" height="231" alt="image" src="https://github.com/user-attachments/assets/aeed3971-0e9c-4dad-8fbe-8d141ebf692f" />
+
 
 -- Check user exists
 SELECT User, Host FROM mysql.user WHERE User = 'appuser';
+<img width="255" height="125" alt="image" src="https://github.com/user-attachments/assets/090f8764-7395-44a1-8579-24e45307c895" />
+
 
 -- Check privileges
 SHOW GRANTS FOR 'appuser'@'%';
 ```
+<img width="570" height="174" alt="image" src="https://github.com/user-attachments/assets/695b1e03-6ca7-4581-857d-a54ac6750d59" />
 
-**Expected output:**
-```
-GRANT ALL PRIVILEGES ON `ivolve`.* TO 'appuser'@'%'
-```
 
 ### Key Concepts
 
@@ -251,114 +258,5 @@ GRANT ALL PRIVILEGES ON `ivolve`.* TO 'appuser'@'%'
 
 ---
 
-## Lab 17: Pod Resource Management with CPU and Memory Requests and Limits
-
-### Objective
-Update the existing Node.js Deployment to define resource requests and limits, then verify and monitor them.
-
-### Resource Configuration
-
-| Type | CPU | Memory |
-|---|---|---|
-| **Request** | 1 vCPU | 1Gi |
-| **Limit** | 2 vCPUs | 2Gi |
-
-### Steps
-
-#### 1. Patch the Deployment
-
-```bash
-kubectl patch deployment nodejs-app -n ivolve --patch '
-{
-  "spec": {
-    "template": {
-      "spec": {
-        "containers": [{
-          "name": "nodejs-app",
-          "resources": {
-            "requests": {
-              "cpu": "1",
-              "memory": "1Gi"
-            },
-            "limits": {
-              "cpu": "2",
-              "memory": "2Gi"
-            }
-          }
-        }]
-      }
-    }
-  }
-}'
-```
-
-#### 2. Verify Rollout
-
-```bash
-kubectl rollout status deployment/nodejs-app -n ivolve
-kubectl get pods -n ivolve
-```
-
-#### 3. Verify with `kubectl describe pod`
-
-```bash
-kubectl describe pod <pod-name> -n ivolve
-```
-
-Look for this section in the output:
-
-```
-Containers:
-  nodejs-app:
-    Requests:
-      cpu:     1
-      memory:  1Gi
-    Limits:
-      cpu:     2
-      memory:  2Gi
-```
-
-#### 4. Monitor Real-Time Usage with `kubectl top`
-
-```bash
-# Verify metrics-server is running
-kubectl get deployment metrics-server -n kube-system
-
-# Monitor pod resource usage
-kubectl top pod -n ivolve
-```
-
-**Expected output:**
-```
-NAME                          CPU(cores)   MEMORY(bytes)
-nodejs-app-xxxxxxx-xxxxx      5m           128Mi
-```
-
-> **Note:** If `kubectl top` returns `error: Metrics API not available`, install metrics-server:
-> ```bash
-> kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-> ```
-
-### Key Concepts
-
-| Field | Behaviour |
-|---|---|
-| `requests.cpu` | Amount of CPU Kubernetes **reserves** on the node for scheduling |
-| `requests.memory` | Amount of memory Kubernetes **reserves** on the node for scheduling |
-| `limits.cpu` | Maximum CPU the pod can use — **throttled** if exceeded |
-| `limits.memory` | Maximum memory the pod can use — **OOMKilled** if exceeded |
-
-### Troubleshooting
-
-**Pod stuck pending after adding resources:**
-```bash
-# Check available node resources
-kubectl describe nodes | grep -A 6 "Allocated resources"
-```
-If the node has less than 1 CPU free, reduce the request value (e.g. `"500m"`) to fit your cluster.
-
-**`kubectl top` not working:**
-Metrics Server must be deployed. Verify with:
-```bash
-kubectl get pods -n kube-system | grep metrics-server
+pods -n kube-system | grep metrics-server
 ```
