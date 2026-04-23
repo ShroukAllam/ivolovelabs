@@ -254,17 +254,5 @@ SHOW GRANTS FOR 'appuser'@'%';
 <img width="570" height="174" alt="image" src="https://github.com/user-attachments/assets/695b1e03-6ca7-4581-857d-a54ac6750d59" />
 
 
-### Key Concepts
 
-| Concept | Description |
-|---|---|
-| Init Container | Runs to completion before app containers start |
-| ConfigMap | Stores non-sensitive configuration (host, port, DB name) |
-| Secret | Stores sensitive data (passwords, usernames) |
-| `CREATE USER IF NOT EXISTS` | Idempotent — safe to run on re-deploy |
-| `FLUSH PRIVILEGES` | Applies grant changes immediately |
 
----
-
-pods -n kube-system | grep metrics-server
-```
