@@ -96,9 +96,11 @@ kubectl create configmap db-config \
   --from-literal=DB_PORT=3306 \
   --from-literal=DB_NAME=ivolve \
   -n ivolve
+```
+
 <img width="724" height="64" alt="image" src="https://github.com/user-attachments/assets/8c80abce-449f-4bfb-8937-73ff1ecc227e" />
 
-
+```bash
 kubectl create secret generic db-secret \
   --from-literal=MYSQL_ROOT_PASSWORD=rootpassword \
   --from-literal=MYSQL_APP_USER=appuser \
@@ -216,9 +218,10 @@ kubectl apply -f deployment.yaml
 ```bash
 # Check pod status (should show Init:0/1 → Running)
 kubectl get pods -n ivolve -w
+```
 <img width="686" height="82" alt="image" src="https://github.com/user-attachments/assets/bfe2a198-852d-4162-8994-bc065cfb90c3" />
 
-
+```bash
 # View init container logs
 kubectl logs <pod-name> -c db-init -n ivolve
 ```
@@ -232,17 +235,22 @@ kubectl exec -it <mysql-pod-name> -n ivolve -- mysql -u root -p
 ```sql
 -- Check database exists
 SHOW DATABASES;
+```
+
 <img width="271" height="231" alt="image" src="https://github.com/user-attachments/assets/aeed3971-0e9c-4dad-8fbe-8d141ebf692f" />
 
-
+```sql
 -- Check user exists
 SELECT User, Host FROM mysql.user WHERE User = 'appuser';
+```
+
 <img width="255" height="125" alt="image" src="https://github.com/user-attachments/assets/090f8764-7395-44a1-8579-24e45307c895" />
 
-
+```sql
 -- Check privileges
 SHOW GRANTS FOR 'appuser'@'%';
 ```
+
 <img width="570" height="174" alt="image" src="https://github.com/user-attachments/assets/695b1e03-6ca7-4581-857d-a54ac6750d59" />
 
 
