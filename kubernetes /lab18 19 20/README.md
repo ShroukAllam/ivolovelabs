@@ -1,4 +1,4 @@
-#Lab 18, 19 & 20 — Kubernetes Network Policy, DaemonSet & RBAC
+# Lab 18, 19 & 20 — Kubernetes Network Policy, DaemonSet & RBAC
 
 
 ## Lab 18: Control Pod-to-Pod Traffic via Network Policy
